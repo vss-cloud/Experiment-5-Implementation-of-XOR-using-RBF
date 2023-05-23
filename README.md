@@ -34,6 +34,43 @@ The RBF of hidden neuron as gaussian function
 
 /** Write the Algorithm in steps**/
 
+Step1:
+Import the necessary libraries of python.
+
+Step2:
+In the end_to_end function, first calculate the similarity between the inputs and the peaks. Then, to find w used the equation Aw= Y in matrix form.
+
+Each row of A (shape: (4, 2)) consists of
+
+Step3:
+Index[0]: similarity of point with peak1
+
+index[1]: similarity of point with peak2
+
+index[2]: Bias input (1)
+
+Y: Output associated with the input (shape: (4, ))
+
+W is calculated using the same equation we use to solve linear regression using a closed solution (normal equation).
+
+Step 4:
+This part is the same as using a neural network architecture of 2-2-1,
+
+2 node input (x1, x2) (input layer)
+
+2 node (each for one peak) (hidden layer)
+
+1 node output (output layer)
+
+Step 5:
+To find the weights for the edges to the 1-output unit. Weights associated would be:
+
+edge joining 1st node (peak1 output) to the output node
+
+edge joining 2nd node (peak2 output) to the output node
+
+bias edge
+
 ## PROGRAM:
 
 
@@ -41,13 +78,88 @@ The RBF of hidden neuron as gaussian function
 ## OUTPUT :
     /**PLOTS of Output in hidden space**/
     /Classification results
+    
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.keras.initializers import Initializer
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.initializers import RandomUniform, Initializer, Constant
 
-## RESULT:
+
+def gaussian_rbf(x, landmark, gamma=1):
+    return np.exp(-gamma * np.linalg.norm(x - landmark)**2)
+    
+def end_to_end(X1, X2, ys, mu1, mu2):
+    from_1 = [gaussian_rbf(i, mu1) for i in zip(X1, X2)]
+    from_2 = [gaussian_rbf(i, mu2) for i in zip(X1, X2)]
+    plt.figure(figsize=(13, 5))
+    plt.subplot(1, 2, 1)
+    plt.scatter((x1[0], x1[3]), (x2[0], x2[3]), label="Class_0")
+    plt.scatter((x1[1], x1[2]), (x2[1], x2[2]), label="Class_1")
+    plt.xlabel("$X1$", fontsize=15)
+    plt.ylabel("$X2$", fontsize=15)
+    plt.title("Xor: Linearly Inseparable", fontsize=15)
+    plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.scatter(from_1[0], from_2[0], label="Class_0")
+    plt.scatter(from_1[1], from_2[1], label="Class_1")
+    plt.scatter(from_1[2], from_2[2], label="Class_1")
+    plt.scatter(from_1[3], from_2[3], label="Class_0")
+    plt.plot([0, 0.95], [0.95, 0], "k--")
+    plt.annotate("Seperating hyperplane", xy=(0.4, 0.55), xytext=(0.55, 0.66),
+                arrowprops=dict(facecolor='black', shrink=0.05))
+    plt.xlabel(f"$mu1$: {(mu1)}", fontsize=15)
+    plt.ylabel(f"$mu2$: {(mu2)}", fontsize=15)
+    plt.title("Transformed Inputs: Linearly Seperable", fontsize=15)
+    plt.legend()
+    A = []
+    for i, j in zip(from_1, from_2):
+        temp = []
+        temp.append(i)
+        temp.append(j)
+        temp.append(1)
+        A.append(temp)
+    A = np.array(A)
+    W = np.linalg.inv(A.T.dot(A)).dot(A.T).dot(ys)
+    print(np.round(A.dot(W)))
+    print(ys)
+    print(f"Weights: {W}")
+    return W
+        def predict_matrix(point, weights):
+    gaussian_rbf_0 = gaussian_rbf(np.array(point), mu1)
+    gaussian_rbf_1 = gaussian_rbf(np.array(point), mu2)
+    A = np.array([gaussian_rbf_0, gaussian_rbf_1, 1])
+    return np.round(A.dot(weights))
+    x1 = np.array([0, 0, 1, 1])
+x2 = np.array([0, 1, 0, 1])
+ys = np.array([0, 1, 1, 0])
+mu1 = np.array([0, 1])
+mu2 = np.array([1, 0])
+w = end_to_end(x1, x2, ys, mu1, mu2)
+print(f"Input:{np.array([0, 0])}, Predicted: {predict_matrix(np.array([0, 0]), w)}")
+print(f"Input:{np.array([0, 1])}, Predicted: {predict_matrix(np.array([0, 1]), w)}")
+print(f"Input:{np.array([1, 0])}, Predicted: {predict_matrix(np.array([1, 0]), w)}")
+print(f"Input:{np.array([1, 1])}, Predicted: {predict_matrix(np.array([1, 1]), w)}")
+mu1 = np.array([0, 0])
+mu2 = np.array([1, 1])
+w = end_to_end(x1, x2, ys, mu1, mu2)
+print(f"Input:{np.array([0, 0])}, Predicted: {predict_matrix(np.array([0, 0]), w)}")
+print(f"Input:{np.array([0, 1])}, Predicted: {predict_matrix(np.array([0, 1]), w)}")
+print(f"Input:{np.array([1, 0])}, Predicted: {predict_matrix(np.array([1, 0]), w)}")
+print(f"Input:{np.array([1, 1])}, Predicted: {predict_matrix(np.array([1, 1]), w)}")
+
+
+**## OUTPUT:**
+![201324580-b173007c-49a3-4c6e-b87d-077c520b98c8](https://github.com/vss-cloud/Experiment-5-Implementation-of-XOR-using-RBF/assets/63903041/768ca2d6-00f5-4a05-87ac-825863838182)
+
+![201324600-d0167f49-d522-4bd8-858d-300b0048ae50](https://github.com/vss-cloud/Experiment-5-Implementation-of-XOR-using-RBF/assets/63903041/cfd5d6c9-4080-4a5f-85f0-0dde9ff82f8f)
 
 
 
+**## RESULT**
 
-
+Thus Implementation of XOR problem using Radial Basis Function executed successfully.
 
 
 
